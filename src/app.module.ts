@@ -3,8 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { WinstonModule } from 'nest-winston';
 import { DatabaseModule } from './modules/database/database.module';
 import { HealthModule } from './modules/health/health.module';
-import { TasksModule } from './modules/tasks/tasks.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { RegistrationModule } from './modules/registration/registration.module';
 import {
   databaseConfig,
   loggingConfig,
@@ -36,8 +36,8 @@ import {
     WinstonModule.forRoot(createWinstonConfig()),
     DatabaseModule,
     HealthModule,
-    TasksModule,
     AuthModule,
+    RegistrationModule,
     // TODO: Add your additional service modules here
     // ExampleModule,
   ],
