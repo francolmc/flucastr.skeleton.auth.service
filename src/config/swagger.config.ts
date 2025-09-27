@@ -172,7 +172,8 @@ export const createSwaggerDocumentBuilder = (
       enabled: true,
       path: 'api',
       title: 'Flucastr Auth Service API',
-      description: 'API del microservicio de autenticación JWT + RBAC + ABAC para la plataforma Flucastr',
+      description:
+        'API del microservicio de autenticación JWT + RBAC + ABAC para la plataforma Flucastr',
       version: '1.0.0',
       contact: {
         name: 'Flucastr Team',
@@ -302,7 +303,8 @@ export const createSwaggerUIOptions = (config?: SwaggerConfig) => {
       showCommonExtensions: uiConfig.showCommonExtensions ?? false,
       tryItOutEnabled: uiConfig.tryItOutEnabled ?? true,
     },
-    customSiteTitle: config?.title || 'Flucastr Auth Service - API Documentation',
+    customSiteTitle:
+      config?.title || 'Flucastr Auth Service - API Documentation',
     customfavIcon: '/favicon.ico',
     customJs: [
       'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.min.js',
