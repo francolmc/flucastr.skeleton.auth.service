@@ -49,10 +49,16 @@ export class RegistrationService {
       verificationTokenExpiresAt.getHours() + 24,
     ); // 24 hours
 
+    // Generate unique secret keys for this user
+    const secretKey = this.generateCuid();
+    const refreshSecretKey = this.generateCuid();
+
     // Create user entity
     const user = new UserEntity({
       email: registerDto.email,
       password: hashedPassword,
+      secretKey,
+      refreshSecretKey,
       firstName: registerDto.firstName,
       lastName: registerDto.lastName,
       isActive: true,
@@ -221,6 +227,21 @@ export class RegistrationService {
 
     // Delete user
     return await this.registrationRepository.delete(id);
+  }
+
+  /**
+   * Generate a CUID-like string for secret keys
+   */
+  private generateCuid(): string {
+    // Generate 24 random characters (lowercase letters and numbers)
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    let result = 'c'; // CUIDs start with 'c'
+
+    for (let i = 0; i < 24; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    return result;
   }
 
   /**

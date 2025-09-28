@@ -8,6 +8,8 @@ export class UserEntity {
   id: string;
   email: string;
   password?: string; // Only for creation/registration
+  secretKey: string; // JWT secret key unique per user
+  refreshSecretKey: string; // Refresh token secret key unique per user
   firstName?: string;
   lastName?: string;
   isActive: boolean;

@@ -22,6 +22,8 @@ export class RegistrationRepository implements RegistrationRepositoryInterface {
         data: {
           email: user.email,
           password: user.password!,
+          secretKey: user.secretKey,
+          refreshSecretKey: user.refreshSecretKey,
           firstName: user.firstName,
           lastName: user.lastName,
           isActive: user.isActive,
@@ -220,6 +222,8 @@ export class RegistrationRepository implements RegistrationRepositoryInterface {
         id: true;
         email: true;
         password: true;
+        secretKey: true;
+        refreshSecretKey: true;
         firstName: true;
         lastName: true;
         isActive: true;
@@ -235,6 +239,8 @@ export class RegistrationRepository implements RegistrationRepositoryInterface {
       id: user.id,
       email: user.email,
       password: user.password,
+      secretKey: user.secretKey,
+      refreshSecretKey: user.refreshSecretKey,
       firstName: user.firstName || undefined,
       lastName: user.lastName || undefined,
       isActive: user.isActive,

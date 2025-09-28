@@ -23,6 +23,10 @@ model User {
   email     String   @unique
   password  String
 
+  // JWT Secret Keys (unique per user)
+  secretKey        String   @default(cuid())
+  refreshSecretKey String   @default(cuid())
+
   // Profile fields
   firstName String?
   lastName  String?
