@@ -4,6 +4,7 @@ import { WinstonModule } from 'nest-winston';
 import { DatabaseModule } from './modules/database/database.module';
 import { HealthModule } from './modules/health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { RegistrationModule } from './modules/registration/registration.module';
 import {
   databaseConfig,
   loggingConfig,
@@ -36,6 +37,7 @@ import {
     DatabaseModule,
     HealthModule,
     AuthModule,
+    RegistrationModule,
     // TODO: Add your additional service modules here
     // ExampleModule,
   ],
