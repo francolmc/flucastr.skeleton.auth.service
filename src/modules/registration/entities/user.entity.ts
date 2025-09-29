@@ -1,4 +1,5 @@
 // entities/user.entity.ts
+import * as crypto from 'crypto';
 
 /**
  * User entity for registration module
@@ -16,6 +17,8 @@ export class UserEntity {
   emailVerified: boolean;
   verificationToken?: string;
   verificationTokenExpiresAt?: Date;
+  renewalVerificationToken?: string; // Token for signature renewal verification
+  renewalVerificationTokenExpiresAt?: Date; // Expiration for renewal verification
   createdAt: Date;
   updatedAt: Date;
 
@@ -30,6 +33,14 @@ export class UserEntity {
   static generateActivationCode(): string {
     // Generate a 6-digit numeric code
     return Math.floor(100000 + Math.random() * 900000).toString();
+  }
+
+  /**
+   * Generate a secure secret key for JWT tokens
+   * @returns A random 64-character hex string
+   */
+  static generateSecretKey(): string {
+    return crypto.randomBytes(32).toString('hex');
   }
 
   /**
@@ -52,6 +63,22 @@ export class UserEntity {
     if (this.firstName) return this.firstName;
     if (this.lastName) return this.lastName;
     return this.email;
+  }
+
+  /**
+   * Regenerate refresh secret key to invalidate all refresh tokens
+   */
+  regenerateRefreshSecretKey(): void {
+    this.refreshSecretKey = UserEntity.generateSecretKey();
+    this.updatedAt = new Date();
+  }
+
+  /**
+   * Regenerate secret key to invalidate all access tokens
+   */
+  regenerateSecretKey(): void {
+    this.secretKey = UserEntity.generateSecretKey();
+    this.updatedAt = new Date();
   }
 
   /**

@@ -30,6 +30,9 @@ export class RegistrationRepository implements RegistrationRepositoryInterface {
           emailVerified: user.emailVerified,
           verificationToken: user.verificationToken,
           verificationTokenExpiresAt: user.verificationTokenExpiresAt,
+          renewalVerificationToken: user.renewalVerificationToken,
+          renewalVerificationTokenExpiresAt:
+            user.renewalVerificationTokenExpiresAt,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
         },
