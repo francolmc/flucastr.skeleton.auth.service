@@ -28,6 +28,8 @@ import {
   RenewSignaturesDto,
   ConfirmRenewSignaturesDto,
   AdminRevokeUserTokensDto,
+  TokenIntrospectResponseDto,
+  IntrospectTokenDto,
 } from './dtos';
 
 @ApiTags('Authentication')
@@ -171,7 +173,7 @@ export class AuthController {
 
   @Post('revoke')
   @UseGuards(JwtGuard)
-  @ApiBearerAuth('bearer')
+  @ApiBearerAuth('JWT')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Revoke refresh token',
@@ -223,7 +225,7 @@ export class AuthController {
 
   @Post('logout')
   @UseGuards(JwtGuard)
-  @ApiBearerAuth('bearer')
+  @ApiBearerAuth('JWT')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'User logout',
@@ -275,7 +277,7 @@ export class AuthController {
 
   @Post('renew-signatures')
   @UseGuards(JwtGuard)
-  @ApiBearerAuth('bearer')
+  @ApiBearerAuth('JWT')
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiOperation({
     summary: 'Request signature renewal',
@@ -375,10 +377,65 @@ export class AuthController {
     return await this.authService.confirmRenewSignatures(confirmDto);
   }
 
+  @Post('introspect')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Introspect access token',
+    description:
+      'Validate and return information about the provided access token',
+  })
+  @ApiBody({
+    type: IntrospectTokenDto,
+    description: 'Token to introspect',
+    examples: {
+      'introspect-token': {
+        summary: 'Token introspection',
+        description: 'Inspect a JWT token',
+        value: {
+          token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Token introspection result',
+    type: TokenIntrospectResponseDto,
+    schema: {
+      example: {
+        active: true,
+        sub: 'cmg32kf5z0000d55o3gox11za',
+        iss: 'flucastr-auth-service',
+        aud: 'flucastr-services',
+        exp: 1638360000,
+        iat: 1638273600,
+        email: 'user@example.com',
+        roles: ['user'],
+        token_type: 'access',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid token format',
+    schema: {
+      example: {
+        active: false,
+        error: 'Invalid token format',
+      },
+    },
+  })
+  async introspectToken(
+    @Body() introspectDto: IntrospectTokenDto,
+  ): Promise<TokenIntrospectResponseDto> {
+    this.logger.log('Token introspection request');
+    return await this.authService.introspectToken(introspectDto.token);
+  }
+
   @Post('admin/revoke-user-tokens')
   @UseGuards(JwtGuard, RbacGuard)
   @RequireAdmin()
-  @ApiBearerAuth('bearer')
+  @ApiBearerAuth('JWT')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Admin revoke user tokens',

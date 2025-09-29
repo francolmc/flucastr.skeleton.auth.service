@@ -21,6 +21,7 @@ import {
   RenewSignaturesDto,
   ConfirmRenewSignaturesDto,
   AdminRevokeUserTokensDto,
+  TokenIntrospectResponseDto,
 } from './dtos';
 
 @Injectable()
@@ -237,6 +238,101 @@ export class AuthService {
       `Admin revoke tokens attempt for user: ${adminRevokeDto.userId}`,
     );
     return await this.revokeAllRefreshTokens(adminRevokeDto.userId);
+  }
+
+  // Introspect token - validate and return token information
+  async introspectToken(token: string): Promise<TokenIntrospectResponseDto> {
+    this.logger.log('Token introspection request');
+
+    try {
+      // Decode token without verification first to get basic info
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const decoded = this.jwtService.decode(token);
+
+      if (!decoded) {
+        return {
+          active: false,
+          error: 'Invalid token format',
+        };
+      }
+
+      // Check if token is expired
+      const now = Math.floor(Date.now() / 1000);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (decoded.exp && decoded.exp < now) {
+        return {
+          active: false,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          sub: decoded.sub as string,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          iss: decoded.iss as string,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          aud: decoded.aud as string,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          exp: decoded.exp as number,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          iat: decoded.iat as number,
+          error: 'Token has expired',
+        };
+      }
+
+      // Try to verify the token with user's secret key
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+        await this.verifyAccessToken(token, decoded.sub);
+      } catch {
+        return {
+          active: false,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          sub: decoded.sub as string,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          iss: decoded.iss as string,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          aud: decoded.aud as string,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          exp: decoded.exp as number,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          iat: decoded.iat as number,
+          error: 'Token signature invalid',
+        };
+      }
+
+      // Get user information
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+      const user = await this.registrationRepository.findById(decoded.sub);
+      if (!user) {
+        return {
+          active: false,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          sub: decoded.sub as string,
+          error: 'User not found',
+        };
+      }
+
+      // Return token information
+      return {
+        active: true,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        sub: decoded.sub as string,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        iss: decoded.iss as string,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        aud: decoded.aud as string,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        exp: decoded.exp as number,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        iat: decoded.iat as number,
+        email: user.email,
+        roles: ['user'], // Default role for now
+        token_type: 'access',
+      };
+    } catch (error) {
+      this.logger.error('Token introspection failed', error);
+      return {
+        active: false,
+        error: 'Token introspection failed',
+      };
+    }
   }
 
   // Verify refresh token method

@@ -8,3 +8,5 @@ export * from './logout.dto';
 export * from './renew-signatures.dto';
 export * from './confirm-renew-signatures.dto';
 export * from './admin-revoke-user-tokens.dto';
+export * from './token-introspect-response.dto';
+export * from './introspect-token.dto';

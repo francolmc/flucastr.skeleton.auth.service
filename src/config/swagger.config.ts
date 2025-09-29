@@ -247,7 +247,7 @@ export const createSwaggerDocumentBuilder = (
         bearerFormat: 'JWT',
         description: 'Enter JWT token',
       },
-      'bearer',
+      'JWT',
     );
   }
 
