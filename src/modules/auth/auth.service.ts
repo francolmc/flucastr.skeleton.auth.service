@@ -20,6 +20,7 @@ import {
   LogoutDto,
   RenewSignaturesDto,
   ConfirmRenewSignaturesDto,
+  AdminRevokeUserTokensDto,
 } from './dtos';
 
 @Injectable()
@@ -226,6 +227,16 @@ export class AuthService {
       );
       throw error;
     }
+  }
+
+  // Admin method to revoke all tokens for a specific user
+  async adminRevokeUserTokens(
+    adminRevokeDto: AdminRevokeUserTokensDto,
+  ): Promise<void> {
+    this.logger.log(
+      `Admin revoke tokens attempt for user: ${adminRevokeDto.userId}`,
+    );
+    return await this.revokeAllRefreshTokens(adminRevokeDto.userId);
   }
 
   // Verify refresh token method

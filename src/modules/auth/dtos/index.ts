@@ -7,3 +7,4 @@ export * from './revoke-token.dto';
 export * from './logout.dto';
 export * from './renew-signatures.dto';
 export * from './confirm-renew-signatures.dto';
+export * from './admin-revoke-user-tokens.dto';

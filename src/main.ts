@@ -43,6 +43,7 @@ async function bootstrap() {
       swaggerConfig,
       swaggerOptions,
     );
+
     const swaggerPath = process.env.SWAGGER_PATH || 'api';
 
     SwaggerModule.setup(swaggerPath, app, document, uiOptions);

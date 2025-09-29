@@ -245,12 +245,9 @@ export const createSwaggerDocumentBuilder = (
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
-        name: 'JWT',
-        description:
-          swaggerConfig.security.jwt.description || 'Enter JWT token',
-        in: 'header',
+        description: 'Enter JWT token',
       },
-      'jwt',
+      'bearer',
     );
   }
 
@@ -302,6 +299,11 @@ export const createSwaggerUIOptions = (config?: SwaggerConfig) => {
       showExtensions: uiConfig.showExtensions ?? false,
       showCommonExtensions: uiConfig.showCommonExtensions ?? false,
       tryItOutEnabled: uiConfig.tryItOutEnabled ?? true,
+      // Authentication settings
+      persistAuthorization: true,
+      displayRequestInterceptor: true,
+      displayResponseInterceptor: true,
+      showMutatedRequest: true,
     },
     customSiteTitle: config?.title || 'Flucastr Auth Service API Documentation',
     customfavIcon: '/favicon.ico',

@@ -6,9 +6,18 @@ import {
   HttpCode,
   HttpStatus,
   Logger,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
+import { JwtGuard } from '../../shared/guards/jwt.guard';
+import { RbacGuard, RequireAdmin } from '../../shared/guards/rbac.guard';
 import {
   LoginDto,
   LoginResponseDto,
@@ -18,6 +27,7 @@ import {
   LogoutDto,
   RenewSignaturesDto,
   ConfirmRenewSignaturesDto,
+  AdminRevokeUserTokensDto,
 } from './dtos';
 
 @ApiTags('Authentication')
@@ -160,6 +170,8 @@ export class AuthController {
   }
 
   @Post('revoke')
+  @UseGuards(JwtGuard)
+  @ApiBearerAuth('bearer')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Revoke refresh token',
@@ -210,6 +222,8 @@ export class AuthController {
   }
 
   @Post('logout')
+  @UseGuards(JwtGuard)
+  @ApiBearerAuth('bearer')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'User logout',
@@ -260,6 +274,8 @@ export class AuthController {
   }
 
   @Post('renew-signatures')
+  @UseGuards(JwtGuard)
+  @ApiBearerAuth('bearer')
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiOperation({
     summary: 'Request signature renewal',
@@ -357,5 +373,63 @@ export class AuthController {
       `Signature renewal confirmation for email: ${confirmDto.email}`,
     );
     return await this.authService.confirmRenewSignatures(confirmDto);
+  }
+
+  @Post('admin/revoke-user-tokens')
+  @UseGuards(JwtGuard, RbacGuard)
+  @RequireAdmin()
+  @ApiBearerAuth('bearer')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Admin revoke user tokens',
+    description:
+      'Administrative endpoint to revoke all tokens for a specific user (requires admin role)',
+  })
+  @ApiBody({
+    type: AdminRevokeUserTokensDto,
+    description: 'User ID whose tokens will be revoked',
+    examples: {
+      'admin-revoke-tokens': {
+        summary: 'Admin token revocation',
+        description: 'Request to revoke all tokens for a specific user',
+        value: {
+          userId: 'cmg32kf5z0000d55o3gox11za',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'User tokens revoked successfully',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Insufficient permissions - admin role required',
+    schema: {
+      example: {
+        message: 'Insufficient permissions. Required roles: admin',
+        error: 'Forbidden',
+        statusCode: 403,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found',
+    schema: {
+      example: {
+        message: 'User not found',
+        error: 'Not Found',
+        statusCode: 404,
+      },
+    },
+  })
+  async adminRevokeUserTokens(
+    @Body() adminRevokeDto: AdminRevokeUserTokensDto,
+  ): Promise<void> {
+    this.logger.log(
+      `Admin token revocation request for user: ${adminRevokeDto.userId}`,
+    );
+    return await this.authService.adminRevokeUserTokens(adminRevokeDto);
   }
 }
