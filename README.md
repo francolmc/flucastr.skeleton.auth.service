@@ -95,6 +95,11 @@ docker run -p 3002:3002 --env-file .env flucastr-lleva-service
 
 ## 📚 Documentación Adicional
 
+- [Sistema de Autenticación](./docs/AUTHENTICATION.md)
+- [Integración en Microservicios](./docs/MICROSERVICE_INTEGRATION.md)
+- [Guía de Desarrollo](./docs/DEVELOPMENT_GUIDE.md)
+- [Variables de Entorno](./docs/ENVIRONMENT_VARIABLES.md)
+- [Desarrollo de Módulos](./docs/MODULE_DEVELOPMENT.md)
 - [NestJS Documentation](https://docs.nestjs.com/)
 - [Prisma Documentation](https://www.prisma.io/docs/)
 - [Swagger/OpenAPI](https://swagger.io/)
