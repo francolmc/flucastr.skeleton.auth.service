@@ -5,6 +5,7 @@ import { DatabaseModule } from './modules/database/database.module';
 import { HealthModule } from './modules/health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { RegistrationModule } from './modules/registration/registration.module';
+import { ConfigModule as AppConfigModule } from './modules/config/config.module';
 import {
   databaseConfig,
   loggingConfig,
@@ -38,6 +39,7 @@ import {
     HealthModule,
     AuthModule,
     RegistrationModule,
+    AppConfigModule,
     // TODO: Add your additional service modules here
     // ExampleModule,
   ],

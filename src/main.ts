@@ -12,6 +12,8 @@ import {
   SwaggerUtils,
   AppConfigUtils,
   EnvValidationUtils,
+  SecurityConfigUtils,
+  AppConfigVerificationUtils,
 } from './config';
 
 async function bootstrap() {
@@ -27,6 +29,21 @@ async function bootstrap() {
   app.enableVersioning({
     type: VersioningType.URI,
   });
+
+  // Enable CORS
+  if (AppConfigUtils.isCorsEnabled()) {
+    const corsConfig = AppConfigUtils.getCorsConfig();
+    app.enableCors(corsConfig);
+    console.log('🌐 CORS enabled with config:', {
+      origin: corsConfig.origin,
+      methods: corsConfig.methods,
+      credentials: corsConfig.credentials,
+    });
+  }
+
+  // Apply security configurations
+  SecurityConfigUtils.applyHelmetConfig(app);
+  SecurityConfigUtils.applyGlobalValidation(app);
 
   // Global logging interceptor
   app.useGlobalInterceptors(new LoggingInterceptor());
@@ -73,6 +90,10 @@ async function bootstrap() {
       console.warn(`⚠️  Missing required variables: ${missingVars.join(', ')}`);
     }
   }
+
+  // Generate configuration reports
+  SecurityConfigUtils.generateSecurityReport();
+  AppConfigVerificationUtils.verifyConfiguration();
 
   console.log(`⚡ ${envInfo.name} v${envInfo.version} ready!\n`);
 }

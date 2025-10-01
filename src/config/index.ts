@@ -51,9 +51,16 @@ export {
 } from './env.validation';
 export type { ValidatedEnvironmentVariables } from './env.validation';
 
+// Security configuration
+export {
+  SecurityConfigUtils,
+  AppConfigVerificationUtils,
+} from './security.config';
+
 // Re-export all configuration types and utilities
 export * from './database.config';
 export * from './logging.config';
 export * from './swagger.config';
 export * from './app.config';
 export * from './env.validation';
+export * from './security.config';

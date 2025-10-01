@@ -370,6 +370,99 @@ export class AppConfigUtils {
   }
 
   /**
+   * Obtiene la configuración completa de CORS
+   */
+  static getCorsConfig() {
+    return {
+      origin: AppConfigUtils.getCorsOrigins(),
+      methods: process.env.CORS_METHODS
+        ? process.env.CORS_METHODS.split(',').map((method) =>
+            method.trim().toUpperCase(),
+          )
+        : ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+      allowedHeaders: process.env.CORS_ALLOWED_HEADERS
+        ? process.env.CORS_ALLOWED_HEADERS.split(',').map((header) =>
+            header.trim(),
+          )
+        : [
+            'Origin',
+            'X-Requested-With',
+            'Content-Type',
+            'Accept',
+            'Authorization',
+            'X-API-Key',
+          ],
+      exposedHeaders: process.env.CORS_EXPOSED_HEADERS
+        ? process.env.CORS_EXPOSED_HEADERS.split(',').map((header) =>
+            header.trim(),
+          )
+        : ['X-Total-Count', 'X-Page-Count'],
+      credentials: process.env.CORS_CREDENTIALS === 'true',
+      maxAge: parseInt(process.env.CORS_MAX_AGE || '86400', 10),
+      preflightContinue: process.env.CORS_PREFLIGHT_CONTINUE === 'true',
+      optionsSuccessStatus: parseInt(
+        process.env.CORS_OPTIONS_SUCCESS_STATUS || '204',
+        10,
+      ),
+    };
+  }
+
+  /**
+   * Verifica si CORS está habilitado
+   */
+  static isCorsEnabled(): boolean {
+    return process.env.CORS_ENABLED !== 'false';
+  }
+
+  /**
+   * Obtiene la configuración completa de seguridad
+   */
+  static getSecurityConfig() {
+    return {
+      helmet: {
+        enabled: process.env.HELMET_ENABLED !== 'false',
+        contentSecurityPolicy:
+          process.env.HELMET_CONTENT_SECURITY_POLICY_ENABLED !== 'false',
+        crossOriginEmbedderPolicy:
+          process.env.HELMET_CROSS_ORIGIN_EMBEDDER_POLICY_ENABLED !== 'false',
+        crossOriginOpenerPolicy:
+          process.env.HELMET_CROSS_ORIGIN_OPENER_POLICY_ENABLED !== 'false',
+        crossOriginResourcePolicy:
+          process.env.HELMET_CROSS_ORIGIN_RESOURCE_POLICY_ENABLED !== 'false',
+        dnsPrefetchControl:
+          process.env.HELMET_DNS_PREFETCH_CONTROL_ENABLED !== 'false',
+        frameguard: process.env.HELMET_FRAMEGUARD_ENABLED !== 'false',
+        hidePoweredBy: process.env.HELMET_HIDE_POWERED_BY_ENABLED !== 'false',
+        hsts: process.env.HELMET_HSTS_ENABLED !== 'false',
+        ieNoOpen: process.env.HELMET_IE_NO_OPEN_ENABLED !== 'false',
+        noSniff: process.env.HELMET_NO_SNIFF_ENABLED !== 'false',
+        originAgentCluster:
+          process.env.HELMET_ORIGIN_AGENT_CLUSTER_ENABLED !== 'false',
+        permittedCrossDomainPolicies:
+          process.env.HELMET_PERMITTED_CROSS_DOMAIN_POLICIES_ENABLED !==
+          'false',
+        referrerPolicy: process.env.HELMET_REFERRER_POLICY_ENABLED !== 'false',
+        xssFilter: process.env.HELMET_XSS_FILTER_ENABLED !== 'false',
+      },
+      cors: AppConfigUtils.getCorsConfig(),
+      rateLimit: {
+        enabled: process.env.RATE_LIMIT_ENABLED === 'true',
+        windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10),
+        max: parseInt(process.env.RATE_LIMIT_MAX || '100', 10),
+        message:
+          process.env.RATE_LIMIT_MESSAGE ||
+          'Too many requests from this IP, please try again later.',
+        standardHeaders: process.env.RATE_LIMIT_STANDARD_HEADERS !== 'false',
+        legacyHeaders: process.env.RATE_LIMIT_LEGACY_HEADERS === 'true',
+        skipSuccessfulRequests:
+          process.env.RATE_LIMIT_SKIP_SUCCESSFUL_REQUESTS === 'true',
+        skipFailedRequests:
+          process.env.RATE_LIMIT_SKIP_FAILED_REQUESTS === 'true',
+      },
+    };
+  }
+
+  /**
    * Obtiene la configuración de timeout
    */
   static getRequestTimeout(): number {
