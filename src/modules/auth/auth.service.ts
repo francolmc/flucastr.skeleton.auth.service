@@ -79,7 +79,7 @@ export class AuthService {
         throw new UnauthorizedException('Invalid refresh token format');
       }
 
-      // Verify the refresh token with the user's current secret key
+      // Verify the refresh token with the global secret key
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
       await this.verifyRefreshToken(logoutDto.refreshToken, decoded.sub);
 
@@ -90,10 +90,9 @@ export class AuthService {
         throw new NotFoundException('User not found');
       }
 
-      // Regenerate both secret keys to invalidate ALL tokens (access and refresh)
-      user.regenerateSecretKey();
-      user.regenerateRefreshSecretKey();
-      await this.registrationRepository.update(user.id, user);
+      // Note: With global JWT secret, we can't invalidate individual tokens
+      // The client should discard the tokens on their side
+      // For enhanced security, consider implementing token blacklisting
 
       this.logger.log(`User logged out successfully: ${user.email}`);
     } catch (error) {
@@ -131,7 +130,7 @@ export class AuthService {
     };
     try {
       const accessToken = await this.jwtService.signAsync(payload, {
-        secret: user.secretKey,
+        secret: this.configService.get('jwt.secret'),
         expiresIn: '1h',
         algorithm: 'HS256',
         issuer: this.configService.get('jwt.issuer'),
@@ -139,7 +138,7 @@ export class AuthService {
       });
       const refreshPayload = { sub: user.id, type: 'refresh' };
       const refreshToken = await this.jwtService.signAsync(refreshPayload, {
-        secret: user.refreshSecretKey,
+        secret: this.configService.get('jwt.secret'),
         expiresIn: '7d',
         algorithm: 'HS256',
         issuer: this.configService.get('jwt.issuer'),
@@ -342,7 +341,7 @@ export class AuthService {
       if (!user) throw new NotFoundException('User not found');
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const decoded = await this.jwtService.verifyAsync(token, {
-        secret: user.refreshSecretKey,
+        secret: this.configService.get('jwt.secret'),
         algorithms: ['HS256'],
         issuer: this.configService.get('jwt.issuer'),
         audience: this.configService.get('jwt.audience'),
@@ -364,7 +363,7 @@ export class AuthService {
       if (!user) throw new NotFoundException('User not found');
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const decoded = await this.jwtService.verifyAsync(token, {
-        secret: user.secretKey,
+        secret: this.configService.get('jwt.secret'),
         algorithms: ['HS256'],
         issuer: this.configService.get('jwt.issuer'),
         audience: this.configService.get('jwt.audience'),
