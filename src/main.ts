@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { VersioningType } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { SwaggerModule } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
 import { WinstonModule } from 'nest-winston';
 import { LoggingInterceptor } from './shared/interceptors/logging.interceptor';
 import {
@@ -10,6 +11,7 @@ import {
   createSwaggerDocumentOptions,
   createSwaggerUIOptions,
   SwaggerUtils,
+  SwaggerConfig,
   AppConfigUtils,
   EnvValidationUtils,
   SecurityConfigUtils,
@@ -50,18 +52,22 @@ async function bootstrap() {
 
   // Swagger configuration
   if (SwaggerUtils.isEnabled()) {
-    const swaggerBuilder = createSwaggerDocumentBuilder();
-    const swaggerConfig = swaggerBuilder.build();
+    // Obtener la configuración de Swagger desde ConfigService
+    const configService = app.get(ConfigService);
+    const swaggerConfig = configService.get<SwaggerConfig>('swagger');
+
+    const swaggerBuilder = createSwaggerDocumentBuilder(swaggerConfig);
+    const swaggerDocument = swaggerBuilder.build();
     const swaggerOptions = createSwaggerDocumentOptions();
-    const uiOptions = createSwaggerUIOptions();
+    const uiOptions = createSwaggerUIOptions(swaggerConfig);
 
     const document = SwaggerModule.createDocument(
       app,
-      swaggerConfig,
+      swaggerDocument,
       swaggerOptions,
     );
-
-    const swaggerPath = process.env.SWAGGER_PATH || 'api';
+    const swaggerPath =
+      swaggerConfig?.path || process.env.SWAGGER_PATH || 'api';
 
     SwaggerModule.setup(swaggerPath, app, document, uiOptions);
   }
